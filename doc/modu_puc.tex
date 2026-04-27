@@ -1,0 +1,165 @@
+\documentclass{article}
+\input{import_include}
+\input{import_authors}
+% version
+\newcommand{\version}{v1.0.1}
+%-----------------------------------------------
+% title
+% 
+\title{
+	\Huge \textbf{PUC} \\[1em]
+	\normalsize Version \version 
+}
+\author{}
+\date{}
+
+%-----------------------------------------------
+% document
+%
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\subsection{Targets}
+
+
+\subsection{Background}
+\subsection{Terminology}
+\input{import_terms}
+
+
+\section{Time Frequency Domain}
+
+\section{Time Domain}
+%5G 的时间单位$t_c=\frac{1}{\Delta f_{\max}\cdot 4096}$, 5G 的FFT size最大是4096（）
+\begin{equation}
+s_l^{p,\mu} = \sum_{k=0}^{L_{RA}-1}\alpha^{(p,RA)}_k e^{j2\pi(k+Kk_1+\bar{k})\Delta f_{RA}(t-N_{CP,l}^{RA}T_c - t^{RA}_{start})}
+\end{equation}
+其中$\alpha^{(p,RA)}_k$是PRACH频域的信号，我们要把它映射到$l$ timeslot上面\\
+$t^{\text{RA}}_{\text{start}} \leq t < t^{\text{RA}}_{\text{start}} + (N_{\text{u}} + N_{\text{CP}, l}^{\text{RA}})T_\text{c}$
+\subsection{频率部分}
+首先我们要确定每个子载波的绝对频率$e^{j2\pi(k+Kk_1+\bar{k})}\Delta f_{RA}$
+	\begin{itemize}
+	\item $\Delta f_{RA}$是PRACH子载波间隔\\
+	1.25kHz或5kHz用于低频段（FR1）的长前导码（$L_{RA}$ = 839），覆盖范围大\\
+	15kHz, 30kHz, 60 kHz, 120 kHz：用于高频段（FR2）或特殊场景的短前导码（$L_{RA}$ = 139, 571, 1151），更适合高速和短时延需求。
+	\item $\Delta f$是bandwidth part的子载波间隔（inital access bandwidth part 或 the active bandwith part）
+	\item $K=\frac{\Delta f}{\Delta f_{RA}}$是比例因子（Scaling Factor）。
+	\item $k_1$是一个频率偏移
+	\begin{align*}
+	k_1 &= k^{\mu}_0 + (N^{\text{start}}_{\text{BWP}, i} - N^{\text{start}, \mu}_{\text{grid}})N^{\text{RB}}_{\text{SC}} - N^{\text{size}, \mu}_{\text{grid}}N^{\text{RB}}_{\text{SC}} + n^{\text{start}}_{\text{RA}}N^{\text{RB}}_{\text{sc}} \\
+	&+\begin{cases}
+	n_{\text{RA}}N^{\text{RA}}_{\text{RB}}N^{\text{RB}}_{\text{sc}} & L_{\text{RA}}\in\{139, 839\} \\
+	n_{\text{RA}}N^{\text{RA}}_{\text{RB}}N^{\text{RB}}_{\text{sc}} & L_{\text{RA}}\in\{571, 1151\} \text{ in FR2-2} \\
+	(N^{\text{start}, \mu}_{\text{RB, UL}, n_0+n_{\text{RA}}} - N^{\text{start}, \mu}_{\text{RB, UL}, n_0} ) N^{\text{RB}}_{\text{sc}} & L_{\text{RA}}\in\{571, 1151\} \text{ in FR1}
+	\end{cases}
+	\end{align*}
+		\begin{itemize}
+		\item $k^{\mu}_0$是让不同子载波间隔配置（numerology）下偏移（相对最大子载波间隔$\mu_0$对应的资源块的频域中心）
+		\[
+		k^{\mu}_0 = (N^{\text{start},\mu}_{\text{grid},x} + N^{\text{size},\mu}_{\text{grid},x}/2)N_{\text{sc}}^{\text{RB}} - (N^{\text{start},\mu_0}_{\text{grid},x} + N^{\text{size},\mu_0}_{\text{grid},x}/2)N_{\text{sc}}^{\text{RB}}2^{\mu_0 - \mu}
+		\]
+		$N^{\text{start},\mu}_{\text{grid},x}$是当前子载波间隔$\mu$下的resouce grid的起始位置（$x$表示DL,UL,SL）\\
+		$N^{\text{size},\mu}_{\text{grid},x}$是当前子载波间隔$\mu$下的resouce grid的占用大小（$x$表示DL,UL,SL）\\
+		$(N^{\text{start},\mu}_{\text{grid},x} + N^{\text{size},\mu}_{\text{grid},x}/2)N_{\text{sc}}^{\text{RB}}$是当前子载波间隔$\mu$的中心子载波位置\\
+		$(N^{\text{start},\mu_0}_{\text{grid},x} + N^{\text{size},\mu_0}_{\text{grid},x}/2)N_{\text{sc}}^{\text{RB}}2^{\mu_0 - \mu}$是最大子载波间隔$\mu_0$的中心子载波位置（换算成$\mu$对应的子载波中心）
+		\item $N^{\text{start}}_{\text{BWP}, i}$ 是BWP的最小resource block的编号（initial access或active）\\
+		$(N^{\text{start}}_{\text{BWP}, i} - N^{\text{start}, \mu}_{\text{grid}})N^{\text{RB}}_{\text{SC}}$当前上行 BWP 的起始位置，相对于整个资源网格起始位置的偏移量（以子载波为单位）\\
+		$(N^{\text{start}}_{\text{BWP}, i} - N^{\text{start}, \mu}_{\text{grid}})N^{\text{RB}}_{\text{SC}} - N^{\text{size}, \mu}_{\text{grid}}N^{\text{RB}}_{\text{SC}}$ 减去半个网格宽度，得到BWP起点相对于网格中心的偏移
+		\item $n^{\text{start}}_{\text{RA}}$是相对active BWP的resource block 0的偏移
+		\item {\color{darkred}{后面加的部分}}
+			\begin{itemize}
+			\item $n_{\text{RA}}N^{\text{RA}}_{\text{RB}}N^{\text{RB}}_{\text{sc}}$, $n_{\text{RA}}$表示PRACH在频域的每个传输机会的索引号，$N^{\text{RB}}_{\text{sc}}$表示换算到对应\\
+			PUSCH的$\mu$的RB数量。\\
+			{\color{darkred}{注意：}}{\color{darkgreen}{FR2-2 PRACH has 139, 571, 1151; FR2-1 PRACH only has 139.}}
+			\item 在 FR1 的非授权频谱（例如 5 GHz 频段）中，为了与 Wi-Fi 等其他系统共存，频谱被划分为多个 RB 集合（RB set），每个 RB 集合之间插入了保护带（Guard Band），用来减少干扰。\\
+			$N^{\text{start}, \mu}_{\text{RB, UL}, n} $是RB set $n$ 的CRB index\\
+			$N^{\text{start}, \mu}_{\text{RB, UL}, n_0} $是RB set $n$ 的第一个PRACH频域机会（$n^{\text{start}}_{RA}$配置）\\
+			$N^{\text{start}, \mu}_{\text{RB, UL}, n_0 + n_{RA}} $是RB set $n$ 的第$n_{RA}$个PRACH频域机会\\
+			{\color{darkred}{注意：所有$n_{RA}$个PRACH传输机会都在当前RB set内}}
+			
+			\end{itemize}
+		\end{itemize}
+	\item $\bar{k}$是PRACH的频率偏移（小）
+	\end{itemize}
+	
+\subsection{时域部分}
+$t^{\text{RA}}_{\text{start}} \leq t < t^{\text{RA}}_{\text{start}} + (N_{\text{u}} + N_{\text{CP}, l}^{\text{RA}})T_\text{c}$
+\begin{itemize}
+\item $N_{\text{u}}$是PRACH 前导码中 Zadoff-Chu 序列（或其它低 PAPR 序列）在时域上所占用的样本数量，{\color{darkred}{具体见TS38211 Table 6.3.3.1-1 \& Table 6.3.3.1-2}}\cite{38211}\\
+\item $N_{\text{CP}, l}^{\text{RA}}$是第$l$的OFDM符号上的CP长度，{\color{darkred}{具体见TS38211 Table 6.3.3.1-1 \& Table 6.3.3.1-2}}\cite{38211}\\
+\[
+N_{\text{CP}, l}^{\text{RA}} = N_{\text{CP}}^{\text{RA}} + n \cdot 16 \kappa
+\]
+	\begin{itemize}
+	\item 当 $\Delta f_{\text{RA}}\in{1.25, 5}$ kHz（即长前导码 839 格式）时：$n=0$，没有额外补偿。
+	\item 当 $\Delta f_{\text{RA}}\in{15,30,60,120,480,960}$ kHz（即长前导码 839 格式）时：先看不补偿的PRACH时间$[t^{\text{RA}}_{\text{start}}, t^{\text{RA}}_{\text{start}} + (N_{\text{u}} + N_{\text{CP}}^{\text{RA}})T_\text{c}$ 在一个subframe内和时刻0、时刻$(\Delta f_{\max}N_f/2000)\cdot T_c=0.5$ms重复的次数$n$，每重复一次就要补偿$16 \kappa$。
+	\end{itemize}
+\item PRACH 的时域位置对齐到了普通上行符号的网格上，便于 gNB 统一管理时序
+\[
+t^{\text{RA}}_{\text{start}} = t^{\mu}_{\text{start}, l}
+\]
+\[
+t^{\mu}_{\text{start}, l} = 
+\begin{cases}
+0 & l = 0 \\
+t^{\mu}_{\text{start}, l-1} + (N_{\text{u}}^\mu + N_{\text{CP}, l-1}^{\text{RA}})T_\text{c}
+\end{cases}
+\]
+	\begin{itemize}
+	\item $N_{\text{u}}^\mu = 2048\kappa \cdot 2^{-\mu}$
+	\item $N_{\text{CP}, l}^\mu$
+		
+	\[
+	N_{\text{CP}, l}^\mu = 
+	\begin{cases}
+	512\kappa \cdot 2^{-\mu} 			& \text{extended CP} \\
+	144\kappa \cdot 2^{-\mu} + 16\kappa 	& \text{normal CP, }  l\in \{0, 7\cdot 2^\mu\} \\
+	144\kappa \cdot 2^{-\mu} 			& \text{normal CP, }  l\notin \{0, 7\cdot 2^\mu\}  \\
+	\end{cases}
+	\]
+	\item $\Delta f_{\text{RA}} \in\{1.25, 5\}$kHz, $\mu=0$；其他情况$\mu$的值满足$\Delta f_{\text{RA}}=15\cdot 2^\mu$kHz
+	\item $l$是prach占用的symbol index
+	\[
+	l = l_0 + n^{\text{RA}}_tN^{\text{RA}}_{\text{dur}} + 14n^{\text{RA}}_{\text{slot}}
+	\]
+		\begin{itemize}
+		\item $l_0$ 是TS38211 Tables 6.3.3.2-2 to 6.3.3.2-4里面的{\color{darkred}{starting symbol}}\cite{38211}
+		\item $n^{\text{RA}}_t=0,\cdots,N_{\text{t}}^{\text{RA, slot}}-1$是PRACH在一个slot内的传输机会。$\Delta L_{\text{RA}} \in\{139, 571, 1151\}$，$N_{\text{t}}^{\text{RA, slot}}$见TS38211 Tables 6.3.3.2-2 to 6.3.3.2-4里面的{\color{darkred}{number of time-domain PRACH occasions within a PRACH slot}}\cite{38211}；$\Delta L_{\text{RA}} = 839$，$N_{\text{t}}^{\text{RA, slot}}=1$\\
+		
+		{\color{darkred}{TS38211 Tables 6.3.3.2-2 to 6.3.3.2-4 preamble format是A1/B1, A2/B2 or A3/B3时，$n^{\text{RA}}_t$会决定具体的格式}}\cite{38211}
+			\begin{itemize}
+			\item $n^{\text{RA}}_t=N_{\text{t}}^{\text{RA, slot}}-1$，发B1, B2 or B3
+			\item 其他时刻发A1, A2 or A3
+			\end{itemize}					
+		
+		\item $N^{\text{RA}}_{\text{dur}}$见TS38211 Tables 6.3.3.2-2 to 6.3.3.2-4里面的{\color{darkred}{PRACH duration}}\cite{38211}
+		
+		\item $n^{\text{RA}}_{\text{slot}}$的设置
+			\begin{itemize}
+			\item $\Delta f_{\text{RA}} \in\{1.25, 5, 15, 60\}$kHz, $n^{\text{RA}}_{\text{slot}}=0$
+			\item $\Delta f_{\text{RA}} \in\{30, 120\}$kHz, TS38211 Tables 6.3.3.2-2 to 6.3.3.2-4里面的{\color{darkred}{Number of PRACH slots within a subframe}}或{\color{darkred}{Number of PRACH slots within a 60 kHz slot}}是1，则$n^{\text{RA}}_{\text{slot}}=1$；否则$n^{\text{RA}}_{\text{slot}}\in\{0,1\}$\cite{38211}
+			\item $\Delta f_{\text{RA}} \in\{480, 960\}$kHz\\
+			TS38211 Tables 6.3.3.2-4里面的{\color{darkred}{Number of PRACH slots within a 60 kHz slot}}是1\\
+			$n^{\text{RA}}_{\text{slot}}=7$ for $\Delta f_{\text{RA}}=480$kHz and $n^{\text{RA}}_{\text{slot}}=15$ for $\Delta f_{\text{RA}}=960$kHz
+			
+			Tables 6.3.3.2-4里面的{\color{darkred}{Number of PRACH slots within a 60 kHz slot}}是2\\
+			$n^{\text{RA}}_{\text{slot}}\in\{3,7\}$ for $\Delta f_{\text{RA}}=480$kHz and $n^{\text{RA}}_{\text{slot}}\in\{7,15\}$ for $\Delta f_{\text{RA}}=960$kHz
+			\end{itemize}
+		
+		
+		
+		\end{itemize}
+	\end{itemize}
+
+
+\end{itemize}
+
+\newpage
+\bibliographystyle{IEEEtran}
+\bibliography{import_reference}
+\end{document}
