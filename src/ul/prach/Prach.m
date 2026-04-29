@@ -11,12 +11,20 @@ classdef Prach < handle
 
 
     properties
+        carrier = NaN;
         config = NaN;
     end
         
     methods
         %{
-        loade the prach configuration
+        prach settings
+        @
+        %}
+        function self = Prach(varargin)
+        end
+
+        %{
+        set the prach configuration
         <input-FD>
         @freqRng:       frequency range, 'FR1' or 'FR2'
         @duplmod:       duplex mode, 'FDD' or 'TDD'
@@ -27,8 +35,8 @@ classdef Prach < handle
         <input-TD>
         @k1:            the frequency offset as `k1` in
         %}
-        function self = Prach(freqRng, duplmod, confId, scs, restrictSet, Ncs, ...
-                              k1)
+        function setConfig(self, freqRng, duplmod, confId, scs, restrictSet, Ncs, ...
+                                 k1)
             %% input check
             freqRng = upper(char(freqRng));
             assert(ismember(freqRng, self.FRs), "Frequency range can only be 'FR1' or 'FR2'");
@@ -58,8 +66,8 @@ classdef Prach < handle
                                         "ZeroCorrelationZone", Ncs ...
                                         );
             self.config.SequenceIndex = 0;             % the preamble index (0~63), only given when actually generate PRACH
-  
         end
+
 
         %{
         generate the waveform in the time domain

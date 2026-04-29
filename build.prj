@@ -87,7 +87,7 @@ init.m
     <param.required.addons />
     <param.matlab.project.id />
     <param.matlab.project.name />
-    <param.release.start>R2019a</param.release.start>
+    <param.release.start>R2022b</param.release.start>
     <param.release.end>latest</param.release.end>
     <param.release.current.only>false</param.release.current.only>
     <param.compatiblity.windows>true</param.compatiblity.windows>
@@ -138,7 +138,6 @@ init.m
       <file>${PROJECT_ROOT}</file>
     </fileset.rootdir>
     <fileset.rootfiles>
-      <file>${PROJECT_ROOT}\conf</file>
       <file>${PROJECT_ROOT}\LICENSE</file>
       <file>${PROJECT_ROOT}\nr_prach_gen.m</file>
       <file>${PROJECT_ROOT}\parseConfigurationsFR1PairedParams.m</file>
